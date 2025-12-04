@@ -1,35 +1,36 @@
 import React from 'react';
 
 // Define the type for the change event from a file input
-// React.ChangeEvent<HTMLInputElement> is the standard type in React for this.
 const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     // The event.target is the <input type="file"> element.
-    const inputElement = event.target;
+    const inputElement: EventTarget & HTMLInputElement = event.target;
 
-    // inputElement.files is a FileList object (which may be null/undefined)
-    const files = inputElement.files;
+    // files will be FileList or null
+    const files: FileList | null = inputElement.files;
 
     if (files && files.length > 0) {
-        // We are focused on the first file for now, but FileList is iterable.
-        const uploadedFile = files[0];
+        console.log(`--- Processing ${files.length} files ---`);
 
-        console.log("File Name:", uploadedFile.name);
-        console.log("File Type:", uploadedFile.type);
-        console.log("File Size:", uploadedFile.size, "bytes");
+        Array.from(files).forEach((uploadedFile: File) => {
+            // Process each individual file here
+            console.log("File Name:", uploadedFile.name);
+            console.log("File Type:", uploadedFile.type);
+            console.log("File Size:", uploadedFile.size, "bytes");
+            console.log("------------------------");
+        });
 
-        // TODO: Add actual file processing logic here.
+        // TODO: Add actual file processing logic here (e.g., uploading each file).
     }
 };
 
 function App() {
     return (
         <div>
-            <h1>File Upload Example (TypeScript)</h1>
+            <h1>File Upload Example (Multiple Files)</h1>
             <input
                 type="file"
                 onChange={handleUpload}
-            // Add 'multiple' if you want to allow selecting more than one file:
-            // multiple 
+                multiple
             />
         </div>
     );
