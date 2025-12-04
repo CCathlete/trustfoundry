@@ -165,12 +165,12 @@ const App = (): JSX.Element => {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <div className="bg-white shadow-2xl rounded-xl p-8 w-full max-w-3xl border-t-4 border-indigo-600">
                 <h1 className="text-3xl font-extrabold text-gray-900 mb-2 flex items-center">
-                    <Files className="w-7 h-7 mr-3 text-indigo-600" />
-                    Data Lake Uploader
+                    <Files className="w-7 h-7 mr-3 text-green-600" />
+                    File Uploader for Trustfoundry
                 </h1>
                 <p className="text-gray-500 mb-6">
-                    Groups files based on a 10MB limit and sends them concurrently to your backend API at
-                    <code className="bg-gray-100 p-1 rounded text-sm text-indigo-600 ml-1">{API_URL}</code>.
+                    Groups files based on a 10MB limit and sends them concurrently to your backend API at <br></br>
+                    <code className="bg-gray-100 p-1 rounded text-lg text-orange-600 ml-1">{API_URL}</code>.
                 </p>
 
                 <label className={`block w-full p-6 border-2 border-dashed rounded-lg cursor-pointer transition duration-150 ${isUploading ? 'bg-gray-100 border-gray-300' : 'hover:border-indigo-500 hover:bg-indigo-50 border-gray-400'

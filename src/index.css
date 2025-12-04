@@ -1,0 +1,6 @@
+/* * This file is essential for Tailwind CSS. 
+ * It contains the directives that Tailwind processes to generate all the utility classes (like text-green-500).
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
