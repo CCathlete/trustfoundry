@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { UploadCloud, CheckCircle, XCircle, Loader2, Files } from 'lucide-react';
 
+// 10 MiB
 const FILE_UPLOAD_LIMIT_BYTES: number = 10 * 1024 * 1024;
 const API_URL: string = 'http://localhost:1020/upload';
 
+/**
+ * An upload response from the backend server.
+ */
 interface UploadStatus {
     id: string;
     fileNames: string[];
@@ -12,19 +16,36 @@ interface UploadStatus {
     message: string;
 }
 
-function groupFilesForUpload(files: File[]): File[][] {
-    const sortedFiles: File[] = [...files].sort((a: File, b: File) => b.size - a.size);
+/**
+ * Group files to units by their size acccording to size cap 
+ * in order to send upload them together as a group.
+ */
+function createFileGroups(files: File[]): File[][] {
+
+    const sortedFiles: File[] =
+        [...files].sort((a: File, b: File) => b.size - a.size);
+
+    /**
+     * We want to keep track of the files to add retry attempts in the future.
+     * */
     const fileGroups: File[][] = [];
     let currentGroup: File[] = [];
     let currentSize: number = 0;
 
     sortedFiles.forEach((file: File) => {
+        // If the file is over the cap by itself it becomes it's own group.
         if (file.size > FILE_UPLOAD_LIMIT_BYTES) {
             fileGroups.push([file]);
+
+            // Else, if we can't chunk it with the existing group
+            // it means the current group is full and we create a new group and 
+            // append the file to it.
         } else if (currentSize + file.size > FILE_UPLOAD_LIMIT_BYTES) {
             fileGroups.push(currentGroup);
             currentGroup = [file];
             currentSize = file.size;
+
+            // Else, we try to chunk it together in the existing group.
         } else {
             currentGroup.push(file);
             currentSize += file.size;
@@ -38,7 +59,11 @@ function groupFilesForUpload(files: File[]): File[][] {
     return fileGroups;
 }
 
-async function uploadFileGroup(group: File[], updateStatus: (s: UploadStatus) => void): Promise<void> {
+async function uploadFiles(
+    group: File[],
+    updateStatus: (s: UploadStatus) => void,
+): Promise<void> {
+
     const groupTotalSize: number = group.reduce((sum: number, file: File) => sum + file.size, 0);
     const groupNames: string[] = group.map((f: File) => f.name);
     const groupId: string = groupNames.join('|');
@@ -84,7 +109,7 @@ const App = (): JSX.Element => {
         if (!files || files.length === 0) return;
 
         const fileArray: File[] = Array.from(files);
-        const fileGroups: File[][] = groupFilesForUpload(fileArray);
+        const fileGroups: File[][] = createFileGroups(fileArray);
 
         setIsUploading(true);
 
@@ -105,7 +130,7 @@ const App = (): JSX.Element => {
 
         try {
             await Promise.all(
-                fileGroups.map((group: File[]) => uploadFileGroup(group, updateGroupStatus))
+                fileGroups.map((group: File[]) => uploadFiles(group, updateGroupStatus))
             );
         } catch (error: unknown) {
         } finally {
@@ -174,7 +199,7 @@ const App = (): JSX.Element => {
                         <ul className="space-y-3">
                             {uploadList.map((item: UploadStatus) => (
                                 <li key={item.id} className={`p-4 rounded-lg shadow-md transition duration-150 ${item.status === 'success' ? 'bg-green-50 border border-green-200' :
-                                        item.status === 'error' ? 'bg-red-50 border border-red-200' : 'bg-white border border-gray-200'
+                                    item.status === 'error' ? 'bg-red-50 border border-red-200' : 'bg-white border border-gray-200'
                                     }`}>
 
                                     <div className="flex items-center justify-between mb-2">
