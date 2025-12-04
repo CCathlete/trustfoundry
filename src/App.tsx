@@ -59,4 +59,40 @@ const createFileGroups = (files: File[]): File[][] => {
     return fileGroups;
 }
 
-async const uploadFiles = (group: File[], updateStatus: (status: UploadStatus) => void): Promise<void> => { }
+async const uploadFiles = (group: File[], updateStatus: (status: UploadStatus) => void): Promise<void> => {
+
+    const groupTotalSize: number = group.reduce(
+        (sum: number, file: File): number => sum + file.size,
+        0,
+    );
+    const groupNames: string[] = group.map((f: File): string => f.name);
+    const groupId: string = groupNames.join('|');
+
+    updateStatus({
+        id: groupId,
+        fileNames: groupNames,
+        totalSize: groupTotalSize,
+        status: 'uploading',
+        message: `Sending ${group.length} files...`,
+    });
+
+    const formData: FormData = new FormData();
+
+    group.forEach(
+        (file: File): void => {
+            formData.append('files', file);
+        });
+
+    try {
+        const response: Response = await fetch(API_URL, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Couldn't upload files. Status: ${response.status}.
+                Message: ${response.statusText}`)
+        }
+    }
+
+}
