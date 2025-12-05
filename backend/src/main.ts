@@ -20,7 +20,7 @@ const PORT = process.env.SERVER_PORT || 1020;
  * @returns {IMinioConfig} The validated configuration object.
  * @throws {Error} If any required environment variable is missing or invalid.
  */
-function loadMinioConfig(): IMinioConfig {
+const loadMinioConfig = (): IMinioConfig => {
     const endpoint = process.env.MINIO_ENDPOINT;
     const accessKey = process.env.MINIO_ACCESS_KEY;
     const secretKey = process.env.MINIO_SECRET_KEY;
@@ -60,7 +60,7 @@ function loadMinioConfig(): IMinioConfig {
  * 2. Wiring up the dependencies into the router.
  * 3. Starting the Express server.
  */
-async function bootstrapAndRun() {
+const bootstrapAndRun = async () => {
     console.log("--- Data Lake Ingestion Service Initializing ---");
 
     // --- 1. CONFIGURATION AND SERVICE INITIALIZATION ---

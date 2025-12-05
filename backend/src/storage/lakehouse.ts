@@ -1,27 +1,12 @@
-//src/storage/lakehouse.ts
-import * as path from 'path';
-import * as fs from 'fs';
 import * as Minio from 'minio';
 
 // --- Type Definition Import ---
-// Importing shared file types from the new centralized location.
 import { File, IMinioConfig } from '../declarations/typesAndInterfaces';
-
-
-
-// --- Local Storage Setup (Retained for fallback/initial setup clarity) ---
-const BRONZE_BUCKET_DIR: string = path.join(process.cwd(), 'bronze-bucket-uploads');
-
-// Ensure the local fallback directory exists for demonstration/testing
-if (!fs.existsSync(BRONZE_BUCKET_DIR)) {
-    fs.mkdirSync(BRONZE_BUCKET_DIR, { recursive: true });
-    console.log(`[Storage]: Created local fallback directory: ${BRONZE_BUCKET_DIR}`);
-}
 
 /**
  * Interface for the Bronze Storage layer.
- * This abstraction allows you to easily switch between local disk, S3, GCS, etc.,
- * without changing the FileReceiver logic.
+ * This abstraction allows you to easily switch between storage providers (S3, GCS, etc.),
+ * without changing the application's core logic.
  */
 export interface IStorageService {
     /**
@@ -56,9 +41,9 @@ export class MinIOStorage implements IStorageService {
         console.log(`[Storage]: MinIO Bronze Storage initialized for Bucket: ${this.minioConfig.bucketName}`);
         console.log(`[Storage]: MinIO Endpoint: ${this.minioConfig.endpoint}:${this.minioConfig.port}`);
 
-        // Optionally, check if the bucket exists and create it if it doesn't
+        // Ensure the bucket exists on initialization
         this.ensureBucketExists(minioConfig.bucketName).catch(error => {
-            console.error('[MinIO Init Error]: Failed to ensure bucket existence:', error.message);
+            console.error('[MinIO Init Error]: Failed to ensure bucket existence:', error instanceof Error ? error.message : String(error));
             // In a production environment, you might want to stop the server here
         });
     }
@@ -96,10 +81,9 @@ export class MinIOStorage implements IStorageService {
         }
 
         try {
-            // 2. Use minioClient.putObject to stream/upload the buffer
+            // Use minioClient.putObject to stream/upload the buffer to the S3-compatible storage
             console.log(`[MinIO]: Uploading ${file.originalname} as ${objectName} to bucket ${this.minioConfig.bucketName}...`);
 
-            // The putObject method handles buffer uploads
             await this.minioClient.putObject(
                 this.minioConfig.bucketName,
                 objectName,
