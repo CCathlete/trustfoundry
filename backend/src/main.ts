@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
-import express, { Request, Response, Router } from 'express';
+import express, { Request, Response, Router, NextFunction } from 'express';
 import cors from 'cors';
+import multer from 'multer'; // Import Multer here to use MulterError
 
 // Import necessary internal types and concrete implementations
 import { IMinioConfig, IFileValidator } from './declarations/typesAndInterfaces';
@@ -21,6 +22,7 @@ const PORT = process.env.SERVER_PORT || 1020;
  * @throws {Error} If any required environment variable is missing or invalid.
  */
 const loadMinioConfig = (): IMinioConfig => {
+    // Note: Non-null assertions (`!`) are used in the return object after validation checks
     const endpoint = process.env.MINIO_ENDPOINT;
     const accessKey = process.env.MINIO_ACCESS_KEY;
     const secretKey = process.env.MINIO_SECRET_KEY;
@@ -35,7 +37,7 @@ const loadMinioConfig = (): IMinioConfig => {
         );
     }
 
-    const port = parseInt(portStr, 10);
+    const port = parseInt(portStr!, 10);
     if (isNaN(port)) {
         throw new Error(`Configuration Error: MINIO_PORT environment variable is not a valid number: ${portStr}`);
     }
@@ -43,11 +45,11 @@ const loadMinioConfig = (): IMinioConfig => {
     const useSSL = useSslStr ? useSslStr.toLowerCase() === 'true' : false;
 
     return {
-        endpoint,
+        endpoint: endpoint!,
         port,
-        accessKey,
-        secretKey,
-        bucketName,
+        accessKey: accessKey!,
+        secretKey: secretKey!,
+        bucketName: bucketName!,
         useSSL,
     };
 }
@@ -106,10 +108,8 @@ const bootstrapAndRun = async () => {
 
     // --- 3. ROUTE WIRING AND FALLBACKS ---
     if (mainRouter) {
-        // The main router is mounted at the root path '/'.
         app.use('/', mainRouter);
     } else {
-        // Fallback route if dependencies failed to initialize
         app.use('*', (_, res) => {
             res.status(503).json({
                 status: 'error',
@@ -126,7 +126,29 @@ const bootstrapAndRun = async () => {
         });
     });
 
-    // --- 4. START SERVER ---
+    // --- 4. GLOBAL ERROR HANDLER ---
+    // This is the standard Express error middleware (4 arguments) 
+    // that catches errors passed by Multer's next(err).
+    app.use((err: any, _: Request, res: Response, next: NextFunction) => {
+        if (err instanceof multer.MulterError) {
+            // Handle Multer specific errors (e.g., file size limit)
+            console.error(`[Global Error] Multer Error: ${err.message}`);
+            return res.status(400).json({
+                status: 'error',
+                message: `Upload failed: ${err.message}`,
+                code: err.code
+            });
+        }
+
+        if (err) {
+            // Handle other unhandled errors
+            console.error(`[Global Error] Unhandled Error: ${err.stack || err}`);
+            return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+        }
+        next();
+    });
+
+    // --- 5. START SERVER ---
     app.listen(PORT, () => {
         console.log(`\nExpress server running on port ${PORT}`);
         console.log(`API Endpoint: http://localhost:${PORT}/upload`);
