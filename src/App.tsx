@@ -100,14 +100,13 @@ const uploadFiles = async (
 const App = (): JSX.Element => {
     const [uploadList, setUploadList] = useState<UploadStatus[]>([]);
     const [isUploading, setIsUploading] = useState<boolean>(false);
-    const [lastUploadTime, setLastUploadTime] = useState<number>(0);
+    const [buttonPressMinAgo, setButtonPressMinAgo] = useState<number>(0);
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
         const files: FileList | null = event.target.files;
         const currentTime = Date.now();
 
-        // ⏱️ Rate Limiting Check
-        if (currentTime - lastUploadTime < UPLOAD_COOLDOWN_MS) {
+        if (currentTime - buttonPressMinAgo < UPLOAD_COOLDOWN_MS) {
             alert(`Please wait ${UPLOAD_COOLDOWN_MS / 1000} seconds before starting a new upload.`);
             event.target.value = '';
             return;
@@ -206,7 +205,7 @@ const App = (): JSX.Element => {
             setIsUploading(false);
             event.target.value = '';
             // Record the completion time
-            setLastUploadTime(Date.now());
+            setButtonPressMinAgo(Date.now());
         }
     };
 
