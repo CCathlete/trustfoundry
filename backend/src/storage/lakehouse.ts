@@ -4,19 +4,9 @@ import * as Minio from 'minio';
 
 // --- Type Definition Import ---
 // Importing shared file types from the new centralized location.
-import { File } from '../declarations/typesAndInterfaces';
+import { File, IMinioConfig } from '../declarations/typesAndInterfaces';
 
 
-// --- Configuration Interfaces ---
-
-export interface IMinioConfig {
-    endpoint: string;
-    port: number;
-    accessKey: string;
-    secretKey: string;
-    bucketName: string;
-    useSSL?: boolean; // Optional: Use SSL for secure connections
-}
 
 // --- Local Storage Setup (Retained for fallback/initial setup clarity) ---
 const BRONZE_BUCKET_DIR: string = path.join(process.cwd(), 'bronze-bucket-uploads');

@@ -26,3 +26,13 @@ export interface IFileValidator {
      */
     isOkToUpload(files: File[]): void;
 }
+
+
+export interface IMinioConfig {
+    endpoint: string;
+    port: number;
+    accessKey: string;
+    secretKey: string;
+    bucketName: string;
+    useSSL?: boolean; // Optional: Use SSL for secure connections
+}
