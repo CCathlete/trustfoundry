@@ -10,6 +10,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "dotenv": "^17.2.3",
         "express": "^5.2.1",
         "minio": "^8.0.6",
         "multer": "^2.0.2",
