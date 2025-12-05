@@ -105,7 +105,7 @@ export function createRouter(validator: IFileValidator, storage: IStorageService
      * GET /status
      * Example of a future endpoint.
      */
-    router.get('/status', (req: Request, res: Response) => {
+    router.get('/status', (_: Request, res: Response) => {
         res.status(200).json({ status: 'ok', message: 'Data lake router is active.' });
     });
 

@@ -110,7 +110,7 @@ async function bootstrapAndRun() {
         app.use('/', mainRouter);
     } else {
         // Fallback route if dependencies failed to initialize
-        app.use('*', (req, res) => {
+        app.use('*', (_, res) => {
             res.status(503).json({
                 status: 'error',
                 message: 'Server starting up. Core services are unavailable.',
@@ -119,7 +119,7 @@ async function bootstrapAndRun() {
     }
 
     // Health check route
-    app.get('/health', (req: Request, res: Response) => {
+    app.get('/health', (_: Request, res: Response) => {
         res.status(200).json({
             status: servicesReady ? 'ok' : 'pending',
             message: servicesReady ? 'Server and core services are running.' : 'Services initializing.',
