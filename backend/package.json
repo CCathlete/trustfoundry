@@ -4,11 +4,12 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "compile": "tsc src/**/*.ts -outDir dist",
+        "compile": "tsc",
         "build": "npm run compile && uglifyjs dist/main.js -o dist/index.js",
         "start": "node dist/index.js"
     },
     "dependencies": {
+        "@types/webpack": "^5.28.5",
         "cors": "^2.8.5",
         "dotenv": "^17.2.3",
         "express": "^5.2.1",
@@ -17,6 +18,10 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-router-dom": "latest",
+        "ts-loader": "^9.5.4",
+        "webpack": "^5.103.0",
+        "webpack-cli": "^6.0.1",
+        "webpack-node-externals": "^3.0.0",
         "zod": "^4.1.13"
     },
     "devDependencies": {

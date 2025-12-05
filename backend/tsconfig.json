@@ -1,3 +1,4 @@
+// tsconfig.json
 {
     "compilerOptions": {
         "target": "ES2020",
@@ -12,19 +13,23 @@
         "skipLibCheck": true,
         /* Bundler mode */
         "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
+        // "allowImportingTsExtensions": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "noEmit": true,
+        // "noEmit": true,
+        "noEmit": false,
         "jsx": "react-jsx",
         /* Linting */
         "strict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true
+        "noFallthroughCasesInSwitch": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "outDir": "dist"
     },
     "include": [
-        "src"
+        "src/**/*.ts",
     ],
     "references": [
         {
