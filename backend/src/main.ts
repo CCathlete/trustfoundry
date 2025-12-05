@@ -1,19 +1,18 @@
-// --- Application Components ---
 import * as dotenv from 'dotenv';
+import express, { Request, Response, Router } from 'express';
+import cors from 'cors';
+
+// Import necessary internal types and concrete implementations
+import { IMinioConfig, IFileValidator } from './declarations/typesAndInterfaces';
 import { MinIOStorage, IStorageService } from './storage/lakehouse';
 import { MimeTypeValidator } from './validation/fileValidator';
 
-// --- Types and Interfaces ---
-import { IMinioConfig, IFileValidator } from './declarations/typesAndInterfaces';
+// Import the router factory function
+import { createRouter } from './router/httpRouter';
 
-dotenv.config(); // Load environment variables from .env
+dotenv.config();
 
-// --- Module-Level Service Exports ---
-// Declare the services here. They will be initialized in bootstrapAndRun().
-// Exporting these allows other files (e.g., your Express app) to import and use them.
-export let storageService: IStorageService | null = null;
-export let fileValidator: IFileValidator | null = null;
-
+const PORT = process.env.SERVER_PORT || 1020;
 
 /**
  * Loads and validates configuration settings for the MinIO Storage Service
@@ -29,7 +28,6 @@ function loadMinioConfig(): IMinioConfig {
     const portStr = process.env.MINIO_PORT;
     const useSslStr = process.env.MINIO_USESSL;
 
-    // 1. Basic validation for required string variables
     if (!endpoint || !accessKey || !secretKey || !bucketName || !portStr) {
         throw new Error(
             "Configuration Error: Missing required MinIO environment variables. " +
@@ -37,64 +35,102 @@ function loadMinioConfig(): IMinioConfig {
         );
     }
 
-    // 2. Validate and convert port to number
-    // Fix for previous warning: use non-null assertion (!) since we just checked it.
-    const port = parseInt(portStr!, 10);
+    const port = parseInt(portStr, 10);
     if (isNaN(port)) {
         throw new Error(`Configuration Error: MINIO_PORT environment variable is not a valid number: ${portStr}`);
     }
 
-    // 3. Convert SSL string ('true'/'false') to boolean, default to false
     const useSSL = useSslStr ? useSslStr.toLowerCase() === 'true' : false;
 
     return {
-        // Fix for previous warning: use non-null assertion (!) since we just checked them.
-        endpoint: endpoint!,
+        endpoint,
         port,
-        accessKey: accessKey!,
-        secretKey: secretKey!,
-        bucketName: bucketName!,
+        accessKey,
+        secretKey,
+        bucketName,
         useSSL,
     };
 }
 
 
 /**
- * The main application bootstrap and execution function.
- * This function initializes the storage and validation services 
- * and prepares them for use by the application's consumer (e.g., an Express router).
+ * The main application bootstrap function.
+ * This is the application's single entry point, responsible for:
+ * 1. Initializing all services.
+ * 2. Wiring up the dependencies into the router.
+ * 3. Starting the Express server.
  */
-export async function bootstrapAndRun() { // Exporting the function might be useful
+async function bootstrapAndRun() {
     console.log("--- Data Lake Ingestion Service Initializing ---");
 
+    // --- 1. CONFIGURATION AND SERVICE INITIALIZATION ---
     let minioConfig: IMinioConfig;
     try {
-        // 1. Load configuration from environment variables
         minioConfig = loadMinioConfig();
         console.log("Configuration loaded successfully from environment.");
     } catch (error) {
         if (error instanceof Error) {
             console.error(`\nInitialization Failed: ${error.message}`);
-            // Exit the application if configuration is invalid
             return;
         }
         console.error("\nAn unknown error occurred during configuration loading.");
         return;
     }
 
-    // 2. Initialize Validator
-    // **FIX:** Assign the newly created instance to the exported module-level variable.
-    fileValidator = new MimeTypeValidator();
+    // Initialize concrete service instances (Composition Root)
+    const fileValidator: IFileValidator = new MimeTypeValidator();
     console.log("File Validator initialized.");
 
-    // 3. Initialize Storage Service with real configuration
-    storageService = new MinIOStorage(minioConfig);
+    const storageService: IStorageService = new MinIOStorage(minioConfig);
+    console.log("MinIO Storage Service initialized.");
 
-    // --- Readiness Check ---
-    console.log("\n--- Services Initialized and Ready ---");
-    console.log("The MinIOStorage service is ready to connect to the external MinIO instance.");
-    console.log("The MimeTypeValidator is ready to enforce file type policy.");
-    console.log("Next step: Implement an HTTP endpoint (e.g., Express) to use these services.");
+    const servicesReady = !!fileValidator && !!storageService;
+
+    // --- 2. EXPRESS APPLICATION SETUP ---
+    const app = express();
+    let mainRouter: Router | null = null;
+
+    if (servicesReady) {
+        // Inject the initialized services into the router factory
+        mainRouter = createRouter(fileValidator, storageService);
+        console.log("Router initialized with injected dependencies.");
+    }
+
+    // Middleware Setup
+    app.use(cors({
+        origin: '*',
+        methods: 'GET,POST',
+        allowedHeaders: 'Content-Type,Authorization',
+    }));
+    app.use(express.json());
+
+    // --- 3. ROUTE WIRING AND FALLBACKS ---
+    if (mainRouter) {
+        // The main router is mounted at the root path '/'.
+        app.use('/', mainRouter);
+    } else {
+        // Fallback route if dependencies failed to initialize
+        app.use('*', (req, res) => {
+            res.status(503).json({
+                status: 'error',
+                message: 'Server starting up. Core services are unavailable.',
+            });
+        });
+    }
+
+    // Health check route
+    app.get('/health', (req: Request, res: Response) => {
+        res.status(200).json({
+            status: servicesReady ? 'ok' : 'pending',
+            message: servicesReady ? 'Server and core services are running.' : 'Services initializing.',
+        });
+    });
+
+    // --- 4. START SERVER ---
+    app.listen(PORT, () => {
+        console.log(`\nExpress server running on port ${PORT}`);
+        console.log(`API Endpoint: http://localhost:${PORT}/upload`);
+    });
 }
 
 // Execute the main function

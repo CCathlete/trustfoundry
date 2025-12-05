@@ -1,145 +1,113 @@
-import * as path from 'path';
-import * as fs from 'fs';
-// Removed specific imports that were causing type definition issues.
-import * as Minio from 'minio';
+import { Router, Request, Response } from 'express';
+import multer from 'multer';
 
-// --- Custom Type Definition for Multer File ---
-/**
- * Interface representing the file object provided by Multer (especially with memory storage).
- * This is defined manually to avoid issues with @types/multer or Express type merging.
- */
-interface IMulterFile {
-    fieldname: string;
-    originalname: string;
-    encoding: string;
-    mimetype: string;
-    size: number;
-    buffer: Buffer; // Key property when using memory storage
-}
+// Import shared types and interfaces for explicit typing
+import { IFileValidator } from '../declarations/typesAndInterfaces';
+import { IStorageService } from '../storage/lakehouse';
 
-// Rename File type alias to IMulterFile in the whole document.
-type File = IMulterFile;
+// Define the maximum number of files to accept in a single request.
+const MAX_FILES_PER_REQUEST = 50;
 
+// --- Multer Configuration ---
+// Memory storage is used to get the file buffer for MinIO and validation
+const storageConfig = multer.memoryStorage();
+const upload = multer({
+    storage: storageConfig,
+    limits: {
+        // 10 MB limit (must be consistent with the frontend)
+        fileSize: 10 * 1024 * 1024
+    },
+    // We disable the file filter here and use the batch validator (validator.isOkToUpload) 
+    // inside the route handler for more robust error control.
+}).array('files', MAX_FILES_PER_REQUEST);
 
-// --- Configuration Interfaces ---
-
-export interface IMinioConfig {
-    endpoint: string;
-    port: number;
-    accessKey: string;
-    secretKey: string;
-    bucketName: string;
-    useSSL?: boolean; // Optional: Use SSL for secure connections
-}
-
-// --- Local Storage Setup (Retained for fallback/initial setup clarity) ---
-const BRONZE_BUCKET_DIR: string = path.join(process.cwd(), 'bronze-bucket-uploads');
-
-// Ensure the local fallback directory exists for demonstration/testing
-if (!fs.existsSync(BRONZE_BUCKET_DIR)) {
-    fs.mkdirSync(BRONZE_BUCKET_DIR, { recursive: true });
-    console.log(`[Storage]: Created local fallback directory: ${BRONZE_BUCKET_DIR}`);
-}
 
 /**
- * Interface for the Bronze Storage layer.
- * This abstraction allows you to easily switch between local disk, S3, GCS, etc.,
- * without changing the FileReceiver logic.
+ * Factory function to create and configure the application router.
+ * Dependencies (IFileValidator, IStorageService) are injected here.
+ * @param validator The service responsible for file validation.
+ * @param storage The service responsible for file persistence.
+ * @returns An Express Router instance.
  */
-export interface IStorageService {
+export function createRouter(validator: IFileValidator, storage: IStorageService): Router {
+    const router = Router();
+
     /**
-     * Stores a file and returns its unique identifier/path.
-     * @param file The file object provided by the upload middleware (Multer).
-     * @returns A Promise resolving to the final file name in storage.
+     * POST /upload
+     * Endpoint to handle file ingestion into the data lake's Bronze layer.
      */
-    storeFile(file: File): Promise<string>;
-}
+    router.post('/upload', (req: Request, res: Response) => {
+        // 1. Process files using Multer middleware
+        upload(req, res, async (err) => {
+            if (err instanceof multer.MulterError) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: `Upload failed due to processing error: ${err.message}`,
+                    code: err.code
+                });
+            }
 
-/**
- * MinIO implementation of the Bronze Storage Service.
- * This class connects to the MinIO instance and uploads the file buffer.
- */
-export class MinIOBronzeStorage implements IStorageService {
+            if (err) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: err.message || 'Unknown file processing error.'
+                });
+            }
 
-    private minioConfig: IMinioConfig;
-    private minioClient: Minio.Client;
+            const files = req.files as Express.Multer.File[];
 
-    constructor(minioConfig: IMinioConfig) {
-        this.minioConfig = minioConfig;
+            if (!files || files.length === 0) {
+                return res.status(400).json({ status: 'error', message: 'No files uploaded.' });
+            }
 
-        // 1. Initialize the MinIO Client using the configuration retrieved from .env
-        this.minioClient = new Minio.Client({
-            endPoint: minioConfig.endpoint,
-            port: minioConfig.port,
-            useSSL: minioConfig.useSSL || false, // Default to false if not specified
-            accessKey: minioConfig.accessKey,
-            secretKey: minioConfig.secretKey
+            // 2. Perform Batch Validation using injected IFileValidator
+            try {
+                validator.isOkToUpload(files);
+            } catch (validationError) {
+                console.error('[Router] File Validation Error:', validationError);
+                return res.status(400).json({
+                    status: 'error',
+                    message: validationError instanceof Error ? validationError.message : 'Files failed security validation.'
+                });
+            }
+
+            console.log(`[Router] Received ${files.length} files. Starting persistence...`);
+
+            // 3. Persist files to MinIO using injected IStorageService
+            try {
+                const uploadPromises = files.map(file => {
+                    return storage.storeFile(file);
+                });
+
+                await Promise.all(uploadPromises);
+
+                console.log(`[Router] Successfully persisted ${files.length} files to MinIO.`);
+
+                // 4. Respond to the client
+                const fileNames = files.map(f => f.originalname).join(', ');
+                return res.status(200).json({
+                    status: 'success',
+                    message: `Successfully processed and stored ${files.length} files: ${fileNames}`
+                });
+
+            } catch (storageError) {
+                console.error('[Router] Storage Error:', storageError);
+                return res.status(500).json({
+                    status: 'error',
+                    message: 'Failed to store files in the data lake.'
+                });
+            }
         });
-
-        console.log(`[Storage]: MinIO Bronze Storage initialized for Bucket: ${this.minioConfig.bucketName}`);
-        console.log(`[Storage]: MinIO Endpoint: ${this.minioConfig.endpoint}:${this.minioConfig.port}`);
-
-        // Optionally, check if the bucket exists and create it if it doesn't
-        this.ensureBucketExists(minioConfig.bucketName).catch(error => {
-            console.error('[MinIO Init Error]: Failed to ensure bucket existence:', error.message);
-            // In a production environment, you might want to stop the server here
-        });
-    }
-
-    /**
-     * Helper function to check and create the bucket if necessary.
-     */
-    private async ensureBucketExists(bucketName: string): Promise<void> {
-        const exists = await this.minioClient.bucketExists(bucketName);
-        if (!exists) {
-            console.log(`[MinIO]: Bucket '${bucketName}' not found. Creating bucket...`);
-            await this.minioClient.makeBucket(bucketName, 'us-east-1'); // Region is often required
-            console.log(`[MinIO]: Bucket '${bucketName}' created successfully.`);
-        } else {
-            console.log(`[MinIO]: Bucket '${bucketName}' already exists.`);
-        }
-    }
+    });
 
 
     /**
-     * Uploads the file buffer directly to the configured MinIO bucket.
-     * @param file The file object containing buffer data (from Multer's memoryStorage).
-     * @returns The final object name (filename) used in the bucket.
+     * GET /status
+     * Example of a future endpoint.
      */
-    async storeFile(file: File): Promise<string> {
-        // Generate a unique object name (filename in the bucket)
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const objectName = uniqueSuffix + '-' + file.originalname;
+    router.get('/status', (req: Request, res: Response) => {
+        res.status(200).json({ status: 'ok', message: 'Data lake router is active.' });
+    });
 
-        // Ensure the file has a buffer property (required since we use memoryStorage in the router)
-        // No need for 'as any' cast here, as 'file' is now strongly typed as IMulterFile, which includes 'buffer'.
-        const fileBuffer: Buffer = file.buffer;
-
-        if (!fileBuffer) {
-            // This check remains useful even with strong typing, in case an empty/corrupt file slips through middleware
-            throw new Error('File buffer is missing. Check Multer memory storage configuration.');
-        }
-
-        try {
-            // 2. Use minioClient.putObject to stream/upload the buffer
-            console.log(`[MinIO]: Uploading ${file.originalname} as ${objectName} to bucket ${this.minioConfig.bucketName}...`);
-
-            // The putObject method handles buffer uploads
-            await this.minioClient.putObject(
-                this.minioConfig.bucketName,
-                objectName,
-                fileBuffer,
-                file.size, // Size is required for progress/validation
-                { 'Content-Type': file.mimetype } // Optional: set content type metadata
-            );
-
-            console.log(`[MinIO]: Successfully uploaded object ${objectName}.`);
-            return objectName;
-
-        } catch (error) {
-            console.error(`[Storage Error]: Failed to upload file ${objectName} to MinIO.`, error);
-            // Re-throw a generic error to be caught by the router's error handler
-            throw new Error('Failed to save file to MinIO storage.');
-        }
-    }
-}
+    return router;
+}    
