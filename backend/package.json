@@ -10,13 +10,11 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "autoprefixer": "^10.4.16",
-        "lucide-react": "^0.555.0",
-        "postcss": "^8.4.32",
+        "express": "^5.2.1",
+        "multer": "^2.0.2",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-router-dom": "latest",
-        "tailwindcss": "^3.4.0",
         "zod": "^4.1.13"
     },
     "devDependencies": {
