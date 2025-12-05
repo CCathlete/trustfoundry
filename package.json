@@ -1,11 +1,12 @@
 {
-    "name": "your-file-upload-app",
+    "name": "trustf-file-loading",
     "version": "0.1.0",
     "private": true,
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build",
+        "typecheck": "tsc --noEmit",
+        "build": "npm run typecheck && vite build",
         "preview": "vite preview"
     },
     "dependencies": {
@@ -16,7 +17,6 @@
         "react-dom": "^18.2.0",
         "react-router-dom": "latest",
         "tailwindcss": "^3.4.0",
-        "tsc": "^2.0.4",
         "zod": "^4.1.13"
     },
     "devDependencies": {
