@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { UploadCloud, CheckCircle, XCircle, Loader2, Files } from 'lucide-react';
 import { ZodError } from 'zod';
-import { $ZodIssue as ZodIssue } from 'zod/v4/core';
 // Import the schema and constants from the dedicated file
 import { ForbiddenFileSchema, FORBIDDEN_MIME_TYPES } from './validation_schemas';
 
@@ -18,6 +17,11 @@ interface UploadStatus {
     fileNames: string[];
     totalSize: number;
     status: 'pending' | 'uploading' | 'success' | 'error' | 'validation-error';
+    message: string;
+}
+
+interface ZodIssueStructure {
+    path: (string | number)[];
     message: string;
 }
 
@@ -123,12 +127,13 @@ const App = (): JSX.Element => {
                 validatedFiles.push(file);
             } catch (error: unknown) {
 
-                if (error instanceof ZodError) {
-                    // 🛑 FIX: Use a Type Assertion on the specific property we need, 
-                    // which often fixes compiler conflicts.
-                    const zodError = error as { errors: ZodIssue[] };
+                if (error instanceof ZodError ||
+                    (typeof error === 'object' && error !== null && 'errors' in error)) {
 
-                    // Now access errors safely on the asserted object
+                    // Now that we've guaranteed 'errors' exists (in the case of ZodError), 
+                    // we can safely assert the type.
+                    const zodError = error as { errors: ZodIssueStructure[] };
+
                     const fieldError = zodError.errors[0];
 
                     validationErrorGroups.push({
@@ -168,13 +173,20 @@ const App = (): JSX.Element => {
 
         const initialList: UploadStatus[] = [
             ...validationErrorGroups,
-            ...fileGroups.map((group: File[], index: number) => ({
-                id: `group-${index}-${Date.now()}`,
-                fileNames: group.map((f: File) => f.name),
-                totalSize: group.reduce((sum: number, file: File) => sum + file.size, 0),
-                status: 'pending',
-                message: `Queued for upload... (${group.length} files)`
-            }))
+            ...fileGroups.map(
+
+                (group: File[], index: number): UploadStatus => {
+
+                    const groupUploadStatus: UploadStatus = {
+                        id: `group-${index}-${Date.now()}`,
+                        fileNames: group.map((f: File) => f.name),
+                        totalSize: group.reduce((sum: number, file: File) => sum + file.size, 0),
+                        status: 'pending',
+                        message: `Queued for upload... (${group.length} files)`
+                    };
+                    return groupUploadStatus;
+                }
+            )
         ];
 
         setUploadList(initialList);
