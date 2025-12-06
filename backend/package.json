@@ -2,11 +2,11 @@
     "name": "trustf-file-loading",
     "version": "0.1.0",
     "private": true,
-    "type": "module",
+    "type": "commonjs",
     "scripts": {
         "compile": "tsc --noEmit",
         "build": "npm run compile && node esbuild.config.cjs",
-        "start": "node dist/index.mjs"
+        "start": "node dist/index.cjs"
     },
     "dependencies": {
         "cors": "^2.8.5",

@@ -17,6 +17,7 @@ const externalPackages = [
     'undici',
 
     // --- Express CJS dependency chain ---
+    'type-is',
     'accepts',
     'array-flatten',
     'body-parser',
@@ -65,13 +66,13 @@ const externalPackages = [
 
 esbuild.build({
     entryPoints: ['src/main.ts'],
-    outfile: 'dist/index.mjs',
+    outfile: 'dist/index.cjs',
 
     // Build options
     bundle: true,
     platform: 'node',
     target: 'es2022',
-    format: 'esm',
+    format: 'cjs',
     minify: true,
     sourcemap: true,
 
