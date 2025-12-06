@@ -29,7 +29,10 @@ build({
 
     // THE FIX FOR THE CJS/STRICT MODE ISSUE: 
     // Inject compatibility code for old CJS modules that rely on globals
-    inject: ['./shims.mjs'],
+    inject: [
+        './shims.mjs',
+        './node_modules/esbuild/shims/node-module.js',
+    ],
 
     // Module resolution helpers (from previous suggestion)
     mainFields: ['main', 'module'],
