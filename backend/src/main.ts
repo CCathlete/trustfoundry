@@ -161,6 +161,7 @@ const bootstrapAndRun = async () => {
             console.log(`\nExpress server running on port ${PORT}`);
             console.log(`API Endpoint: http://localhost:${PORT}/upload`);
         });
+
     } catch (error) {
         console.error('Failed to start server:', error);
     }
@@ -168,4 +169,11 @@ const bootstrapAndRun = async () => {
 }
 
 // Execute the main function
-bootstrapAndRun();
+(async () => {
+    try {
+        await bootstrapAndRun();
+    } catch (err) {
+        console.error('Fatal error during bootstrap:', err);
+        process.exit(1);
+    }
+})();
