@@ -17,7 +17,7 @@ const externalPackages = [
 
 esbuild.build({
     entryPoints: ['src/main.ts'],
-    outfile: 'dist/index.cjs',
+    outfile: 'dist/index.mjs',
 
     // Build options
     bundle: true,

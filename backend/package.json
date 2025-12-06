@@ -5,8 +5,8 @@
     "type": "module",
     "scripts": {
         "compile": "tsc --noEmit",
-        "build": "npm run compile && node esbuild.config.cjs",
-        "start": "node dist/index.cjs"
+        "build": "npm run compile && node esbuild.config.mjs",
+        "start": "node dist/index.mjs"
     },
     "dependencies": {
         "cors": "^2.8.5",
