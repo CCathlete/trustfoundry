@@ -64,6 +64,7 @@ export class MinIOStorage implements IStorageService {
         const exists = await this.minioClient.bucketExists(bucketName);
         if (!exists) {
             console.log(`[MinIO]: Bucket '${bucketName}' not found. Creating bucket...`);
+            //TODO: Change.
             await this.minioClient.makeBucket(bucketName, 'us-east-1'); // Region is often required
             console.log(`[MinIO]: Bucket '${bucketName}' created successfully.`);
         } else {
