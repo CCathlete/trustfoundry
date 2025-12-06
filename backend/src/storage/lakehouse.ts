@@ -1,7 +1,7 @@
 import * as Minio from 'minio';
 
 // --- Type Definition Import ---
-import { File, IMinioConfig } from '../declarations/typesAndInterfaces';
+import { File, IMinioConfig } from '../declarations/typesAndInterfaces.js';
 
 /**
  * Interface for the Bronze Storage layer.

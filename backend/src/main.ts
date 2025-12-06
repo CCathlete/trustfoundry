@@ -4,12 +4,12 @@ import cors from 'cors';
 import multer from 'multer'; // Import Multer here to use MulterError
 
 // Import necessary internal types and concrete implementations
-import { IMinioConfig, IFileValidator } from './declarations/typesAndInterfaces';
-import { MinIOStorage, IStorageService } from './storage/lakehouse';
-import { MimeTypeValidator } from './validation/fileValidator';
+import { IMinioConfig, IFileValidator } from './declarations/typesAndInterfaces.js';
+import { MinIOStorage, IStorageService } from './storage/lakehouse.js';
+import { MimeTypeValidator } from './validation/fileValidator.js';
 
 // Import the router factory function
-import { createRouter } from './router/httpRouter';
+import { createRouter } from './router/httpRouter.js';
 
 dotenv.config();
 

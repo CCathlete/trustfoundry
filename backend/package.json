@@ -4,15 +4,15 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "compile": "tsc",
-        "build": "npm run compile && node esbuild.config.mjs",
+        "compile": "tsc --noEmit",
+        "build": "npm run compile && node esbuild.config.cjs",
         "start": "node dist/index.cjs"
     },
     "dependencies": {
         "cors": "^2.8.5",
         "dotenv": "^17.2.3",
         "express": "^5.2.1",
-        "minio": "latest",
+        "minio": "^8.0.6",
         "multer": "^2.0.2",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
@@ -26,5 +26,8 @@
         "@types/multer": "^2.0.0",
         "esbuild": "^0.27.1",
         "typescript": "^5.9.3"
+    },
+    "overrides": {
+        "get-intrinsic": "latest"
     }
 }

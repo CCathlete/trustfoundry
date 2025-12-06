@@ -1,5 +1,5 @@
 //src/validation/fileValidator.ts
-import { File, IFileValidator } from '../declarations/typesAndInterfaces';
+import { File, IFileValidator } from '../declarations/typesAndInterfaces.js';
 
 /**
  * Default list of MIME types allowed to be uploaded to the data lake (Bronze Layer).

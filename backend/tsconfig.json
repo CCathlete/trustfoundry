@@ -1,10 +1,11 @@
 {
     "compilerOptions": {
         "target": "ES2022",
-        "module": "esnext", // Clean, modern module setting
-        "moduleResolution": "bundler",
-        "noEmit": true,
-        "outDir": "./dist", // Temp directory for TSC if we run it instead of esbuild.
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        // "noEmit": true,
+        "noEmit": false,
+        "outDir": "./dist",
         "lib": [
             "ES2022"
         ], // Pure server environment
@@ -12,6 +13,7 @@
         "allowSyntheticDefaultImports": true,
         "rootDir": "./src",
         "strict": true,
+        "alwaysStrict": false,
         "skipLibCheck": true,
         "sourceMap": true,
     },

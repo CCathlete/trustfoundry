@@ -2,8 +2,8 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 
 // Import shared types and interfaces for explicit typing
-import { IFileValidator } from '../declarations/typesAndInterfaces';
-import { IStorageService } from '../storage/lakehouse';
+import { IFileValidator } from '../declarations/typesAndInterfaces.js';
+import { IStorageService } from '../storage/lakehouse.js';
 
 // Define the maximum number of files to accept in a single request.
 const MAX_FILES_PER_REQUEST = 50;
