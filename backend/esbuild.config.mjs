@@ -31,7 +31,6 @@ build({
     // Inject compatibility code for old CJS modules that rely on globals
     inject: [
         './shims.mjs',
-        './node_modules/esbuild/shims/node-module.js',
     ],
 
     // Module resolution helpers (from previous suggestion)
