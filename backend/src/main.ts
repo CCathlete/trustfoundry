@@ -156,10 +156,15 @@ const bootstrapAndRun = async () => {
     });
 
     // --- 5. START SERVER ---
-    app.listen(PORT, () => {
-        console.log(`\nExpress server running on port ${PORT}`);
-        console.log(`API Endpoint: http://localhost:${PORT}/upload`);
-    });
+    try {
+        app.listen(PORT, () => {
+            console.log(`\nExpress server running on port ${PORT}`);
+            console.log(`API Endpoint: http://localhost:${PORT}/upload`);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+    }
+
 }
 
 // Execute the main function
