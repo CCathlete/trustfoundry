@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "compile": "tsc --noEmit",
-        "build": "npm run compile && node esbuild.config.mjs",
+        "build": "npm run compile && node esbuild.config.cjs",
         "start": "node dist/index.mjs"
     },
     "dependencies": {
