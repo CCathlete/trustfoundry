@@ -8,7 +8,12 @@ const externalPackages = [
     'cors',
     'dotenv',
     'readable-stream',
+    'undici',
+    'safe-buffer',
+    'get-intrinsic',
+    'es-errors'
 ];
+
 
 esbuild.build({
     entryPoints: ['src/main.ts'],
@@ -18,7 +23,7 @@ esbuild.build({
     bundle: true,
     platform: 'node',
     target: 'es2022',
-    format: 'cjs',
+    format: 'esm',
     minify: true,
     sourcemap: true,
 
