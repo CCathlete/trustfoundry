@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "compile": "tsc",
-        "build": "esbuild src/main.ts --bundle --platform=node --target=es2022 --outfile=dist/index.cjs --external:minio --external:express --external:cors --external:dotenv --minify",
+        "build": "esbuild src/main.ts --bundle --platform=node --target=es2022 --outfile=dist/index.cjs --external:minio --external:express --external:cors --external:dotenv --minify --sourcemap",
         "start": "node dist/index.cjs"
     },
     "dependencies": {
