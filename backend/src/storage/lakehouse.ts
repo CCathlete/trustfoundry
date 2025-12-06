@@ -26,26 +26,35 @@ export class MinIOStorage implements IStorageService {
     private minioConfig: IMinioConfig;
     private minioClient: Minio.Client;
 
-    constructor(minioConfig: IMinioConfig) {
+    // 1. Private constructor to force use of the async factory method
+    private constructor(minioClient: Minio.Client, minioConfig: IMinioConfig) {
+        this.minioClient = minioClient;
         this.minioConfig = minioConfig;
+        console.log(`[Storage]: MinIO Bronze Storage initialized...`);
+    }
 
-        // 1. Initialize the MinIO Client using the configuration retrieved from .env
-        this.minioClient = new Minio.Client({
+    // 2. The new ASYNC factory method: THIS IS THE KEY FIX
+    public static async initialize(minioConfig: IMinioConfig): Promise<MinIOStorage> {
+
+        // Initialize client (can throw synchronous errors)
+        const minioClient = new Minio.Client({
             endPoint: minioConfig.endpoint,
             port: minioConfig.port,
-            useSSL: minioConfig.useSSL || false, // Default to false if not specified
+            useSSL: minioConfig.useSSL || false,
             accessKey: minioConfig.accessKey,
             secretKey: minioConfig.secretKey
         });
 
-        console.log(`[Storage]: MinIO Bronze Storage initialized for Bucket: ${this.minioConfig.bucketName}`);
-        console.log(`[Storage]: MinIO Endpoint: ${this.minioConfig.endpoint}:${this.minioConfig.port}`);
+        const instance = new MinIOStorage(minioClient, minioConfig);
 
-        // Ensure the bucket exists on initialization
-        this.ensureBucketExists(minioConfig.bucketName).catch(error => {
-            console.error('[MinIO Init Error]: Failed to ensure bucket existence:', error instanceof Error ? error.message : String(error));
-            // In a production environment, you might want to stop the server here
-        });
+        // Await the asynchronous setup here
+        try {
+            await instance.ensureBucketExists(minioConfig.bucketName);
+            return instance;
+        } catch (error) {
+            console.error('[FATAL MinIO INIT]: Could not ensure bucket existence. Server aborting.');
+            throw error;
+        }
     }
 
     /**

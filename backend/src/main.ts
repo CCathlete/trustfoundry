@@ -83,7 +83,14 @@ const bootstrapAndRun = async () => {
     const fileValidator: IFileValidator = new MimeTypeValidator();
     console.log("File Validator initialized.");
 
-    const storageService: IStorageService = new MinIOStorage(minioConfig);
+    let storageService: IStorageService | null = null;
+    try {
+        storageService = await MinIOStorage.initialize(minioConfig);
+
+    } catch (error) {
+        console.error('Failed to start server due to critical initialization error:', error);
+        process.exit(1); // Exit with a non-zero code to signal failure
+    }
     console.log("MinIO Storage Service initialized.");
 
     const servicesReady = !!fileValidator && !!storageService;
