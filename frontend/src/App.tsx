@@ -240,7 +240,7 @@ const App = (): JSX.Element => {
                     File Uploader for Trustfoundry
                 </h1>
                 <p className="text-gray-500 mb-6">
-                    Groups files based on a {formatBytes(FILE_UPLOAD_LIMIT_BYTES)} limit and sends them concurrently to your backend API.
+                    Groups your files based on a {formatBytes(FILE_UPLOAD_LIMIT_BYTES)} limit and sends them concurrently to our backend API.
                 </p>
 
                 <label className={`block w-full p-6 border-2 border-dashed rounded-lg cursor-pointer transition duration-150 ${isUploading ? 'bg-gray-100 border-gray-300' : 'hover:border-indigo-500 hover:bg-indigo-50 border-gray-400'
