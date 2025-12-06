@@ -5,14 +5,14 @@
     "type": "module",
     "scripts": {
         "compile": "tsc",
-        "build": "esbuild src/main.ts --bundle --platform=node --target=es2022 --outfile=dist/index.cjs --external:minio --external:express --external:cors --external:dotenv --minify --sourcemap",
+        "build": "node esbuild.config.mjs",
         "start": "node dist/index.cjs"
     },
     "dependencies": {
         "cors": "^2.8.5",
         "dotenv": "^17.2.3",
         "express": "^5.2.1",
-        "minio": "^8.0.6",
+        "minio": "latest",
         "multer": "^2.0.2",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

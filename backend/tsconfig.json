@@ -3,8 +3,7 @@
         "target": "ES2022",
         "module": "commonjs", // Clean, modern module setting
         "moduleResolution": "bundler", // Strict resolution is fine with esbuild
-        // CRUCIAL: We need file emission for the final bundle.
-        "noEmit": false,
+        "noEmit": true,
         "outDir": "./dist/temp", // Temp directory for TSC if we run it instead of esbuild.
         "lib": [
             "ES2022"
