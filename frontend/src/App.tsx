@@ -61,11 +61,12 @@ const createFileGroups = (files: File[]): File[][] => {
 const uploadFiles = async (
     group: File[],
     updateStatus: (s: UploadStatus) => void,
+    id: string,
 ): Promise<void> => {
 
     const groupTotalSize: number = group.reduce((sum: number, file: File) => sum + file.size, 0);
     const groupNames: string[] = group.map((f: File) => f.name);
-    const groupId: string = groupNames.join('|');
+    const groupId: string = id;
 
     updateStatus({ id: groupId, fileNames: groupNames, totalSize: groupTotalSize, status: 'uploading', message: `Sending ${group.length} files...` });
 
@@ -197,7 +198,15 @@ const App = (): JSX.Element => {
             ));
         };
 
-        const pendingGroups = fileGroups.map((group: File[]) => uploadFiles(group, updateGroupStatus));
+        const pendingGroups = fileGroups.map(
+            (group: File[], index: number) =>
+                uploadFiles(
+                    group,
+                    updateGroupStatus,
+                    initialList[index + validationErrorGroups.length].id
+                )
+        );
+
 
         await Promise.all(pendingGroups);
         // isUploading is set to false after a short delay.
