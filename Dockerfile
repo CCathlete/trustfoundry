@@ -6,6 +6,9 @@ FROM node:20-alpine AS frontend_builder
 
 WORKDIR /app/frontend
 
+# Set NODE_ENV for the build process (crucial for setting import.meta.env.PROD)
+ENV NODE_ENV=production
+
 # Copy package files first for better build-cache utilization
 COPY frontend/package*.json ./
 # Install ALL dependencies (including devDependencies for building)
@@ -32,17 +35,16 @@ RUN npm ci --loglevel=error --only=production
 # FINAL STAGE: Nginx & Node.js Production Image
 # Uses Nginx as the base, installs Node.js, and runs both services
 # ----------------------------------------------------------------------
-
 FROM nginx:alpine
 
-# Install Node.js runtime environment and Bash (for the entrypoint script)
-
+# Install Node.js runtime environment, Bash, and gettext (for envsubst)
+# gettext is needed for the Nginx configuration templating
 RUN apk add --no-cache nodejs npm bash gettext
 
 # 1. Configuration Setup
-# Copy the Nginx config template for routing (the sh script would edit env vars and create the nginx.conf file).
+# Copy the custom Nginx TEMPLATE file for routing
 COPY nginx.conf.template /etc/nginx/conf.d/
-# Copy the multi-service startup script.
+# Copy the multi-service startup script
 COPY multi-service-entrypoint.sh /usr/local/bin/
 
 # 2. Frontend Static Files (Served by Nginx)
@@ -57,8 +59,10 @@ COPY --from=backend_deps /app/backend/node_modules ./node_modules
 COPY backend/dist ./dist
 COPY backend/package.json .
 
-# Set necessary environment variables
+# Set necessary environment variables (only NODE_ENV)
 ENV NODE_ENV=production
+# The PORT variable is deliberately left out here; 
+# its default (4000) is set in the entrypoint script.
 
 # Expose the Nginx port (external traffic)
 EXPOSE 80

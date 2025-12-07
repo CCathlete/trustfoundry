@@ -8,6 +8,7 @@ interface ImportMetaEnv {
     // Readonly is good practice for environment variables
     readonly VITE_BACKEND_SERVER_PORT: number;
     readonly PROD: boolean;
+    readonly VITE_IS_PROD: boolean;
 
     // Add any other custom VITE_ variables you use
     // readonly VITE_OTHER_VAR: string; 
