@@ -6,7 +6,7 @@
     "scripts": {
         "compile": "tsc",
         "build": "npm run compile && node esbuild.config.cjs",
-        "start": "node --experimental-json-modules dist/main.js"
+        "start": "node dist/index.cjs"
     },
     "dependencies": {
         "cors": "latest",
