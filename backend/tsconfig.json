@@ -3,8 +3,8 @@
         "target": "ES2024",
         "module": "nodenext",
         "moduleResolution": "nodenext",
-        // "noEmit": true,
-        "noEmit": false,
+        "noEmit": true,
+        // "noEmit": false,
         "outDir": "./dist",
         "lib": [
             "ES2024"
