@@ -5,9 +5,9 @@ import multer from 'multer';
 
 // Import necessary internal types and concrete implementations
 import { IMinioConfig, IFileValidator } from './declarations/typesAndInterfaces.js';
-// import { MinIOStorage, IStorageService } from './storage/lakehouse.js';
-import { IStorageService } from './storage/lakehouse.js';
-import { MockStorage as MinIOStorage } from './storage/mockStorage.js';
+import { MinIOStorage, IStorageService } from './storage/lakehouse.js';
+// import { IStorageService } from './storage/lakehouse.js';
+// import { MockStorage as MinIOStorage } from './storage/mockStorage.js';
 import { MimeTypeValidator } from './validation/fileValidator.js';
 
 // Import the router factory function
@@ -15,7 +15,7 @@ import { createRouter } from './router/httpRouter.js';
 
 dotenv.config();
 
-const PORT = process.env.SERVER_PORT || 1020;
+const PORT = process.env.SERVER_PORT || 9010;
 
 // --- 0. CRITICAL PROCESS ERROR HANDLERS ---
 /**

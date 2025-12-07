@@ -1,13 +1,13 @@
 {
     "compilerOptions": {
-        "target": "ES2022",
+        "target": "ES2024",
         "module": "nodenext",
         "moduleResolution": "nodenext",
         // "noEmit": true,
         "noEmit": false,
         "outDir": "./dist",
         "lib": [
-            "ES2022"
+            "ES2024"
         ], // Pure server environment
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
