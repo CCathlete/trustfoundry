@@ -1,11 +1,13 @@
 import * as dotenv from 'dotenv';
 import express, { Request, Response, Router, NextFunction } from 'express';
-import cors from 'cors';
-import multer from 'multer'; // Import Multer here to use MulterError
+// import cors from 'cors';
+import multer from 'multer';
 
 // Import necessary internal types and concrete implementations
 import { IMinioConfig, IFileValidator } from './declarations/typesAndInterfaces.js';
-import { MinIOStorage, IStorageService } from './storage/lakehouse.js';
+// import { MinIOStorage, IStorageService } from './storage/lakehouse.js';
+import { IStorageService } from './storage/lakehouse.js';
+import { MockStorage as MinIOStorage } from './storage/mockStorage.js';
 import { MimeTypeValidator } from './validation/fileValidator.js';
 
 // Import the router factory function
@@ -127,24 +129,25 @@ const bootstrapAndRun = async () => {
     }
 
     // Middleware Setup
-    app.use(cors({
-        origin: '*',
-        methods: 'GET,POST',
-        allowedHeaders: 'Content-Type,Authorization',
-    }));
+    // app.use(cors({
+    //     origin: '*',
+    //     methods: 'GET,POST',
+    //     allowedHeaders: 'Content-Type,Authorization',
+    // }));
     app.use(express.json());
 
     // --- 3. ROUTE WIRING AND FALLBACKS ---
-    if (mainRouter) {
-        app.use('/', mainRouter);
-    } else {
-        app.use('*', (_, res) => {
-            res.status(503).json({
-                status: 'error',
-                message: 'Server starting up. Core services are unavailable.',
-            });
-        });
-    }
+    app.use('/', mainRouter!);
+    // if (!!mainRouter) {
+    //     app.use('/', mainRouter);
+    // } else {
+    //     app.use('*', (_, res) => {
+    //         res.status(503).json({
+    //             status: 'error',
+    //             message: 'Server starting up. Core services are unavailable.',
+    //         });
+    //     });
+    // }
 
     // Health check route
     app.get('/health', (_: Request, res: Response) => {

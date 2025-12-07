@@ -4,16 +4,16 @@
     "private": true,
     "type": "commonjs",
     "scripts": {
-        "compile": "tsc --noEmit",
+        "compile": "tsc",
         "build": "npm run compile && node esbuild.config.cjs",
-        "start": "node dist/index.cjs"
+        "start": "node --experimental-json-modules dist/main.js"
     },
     "dependencies": {
-        "cors": "^2.8.5",
+        "cors": "latest",
         "dotenv": "^17.2.3",
-        "express": "^5.2.1",
-        "minio": "^8.0.6",
-        "multer": "^2.0.2",
+        "express": "latest",
+        "minio": "latest",
+        "multer": "latest",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-router-dom": "latest",

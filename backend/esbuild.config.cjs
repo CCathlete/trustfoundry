@@ -3,64 +3,6 @@
 const esbuild = require('esbuild');
 
 const externalPackages = [
-    // --- Frameworks ---
-    'express',
-    'cors',
-    'dotenv',
-
-    // --- MinIO + deps ---
-    'minio',
-    'readable-stream',
-    'safe-buffer',
-    'get-intrinsic',
-    'es-errors',
-    'undici',
-
-    // --- Express CJS dependency chain ---
-    'type-is',
-    'accepts',
-    'array-flatten',
-    'body-parser',
-    'bytes',
-    'content-disposition',
-    'content-type',
-    'cookie',
-    'cookie-signature',
-    'debug',
-    'depd',
-    'destroy',
-    'ee-first',
-    'encodeurl',
-    'escape-html',
-    'etag',
-    'finalhandler',
-    'fresh',
-    'http-errors',
-    'iconv-lite',
-    'media-typer',
-    'merge-descriptors',
-    'methods',
-    'mime',
-    'mime-db',
-    'mime-types',
-    'ms',
-    'negotiator',
-    'on-finished',
-    'parseurl',
-    'path-to-regexp',
-    'proxy-addr',
-    'qs',
-    'range-parser',
-    'raw-body',
-    'safe-buffer',
-    'send',
-    'serve-static',
-    'setprototypeof',
-    'statuses',
-    'type-is',
-    'unpipe',
-    'utils-merge',
-    'vary'
 ];
 
 
@@ -75,6 +17,9 @@ esbuild.build({
     format: 'cjs',
     minify: true,
     sourcemap: true,
+    banner: {
+        js: '"use strict";',
+    },
 
     // External packages
     external: externalPackages,
