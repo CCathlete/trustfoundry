@@ -26,8 +26,5 @@
         "@types/multer": "^2.0.0",
         "esbuild": "^0.27.1",
         "typescript": "^5.9.3"
-    },
-    "overrides": {
-        "get-intrinsic": "latest"
     }
 }
