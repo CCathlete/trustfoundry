@@ -8,6 +8,8 @@ WORKDIR /app/frontend
 
 # Set NODE_ENV for the build process (crucial for setting import.meta.env.PROD)
 ENV NODE_ENV=production
+# A fallback for setting the PROD var to true.
+ENV VITE_IS_PROD=true
 
 # Copy package files first for better build-cache utilization
 COPY frontend/package*.json ./
