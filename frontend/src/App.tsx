@@ -199,13 +199,15 @@ const App = (): JSX.Element => {
 
         const pendingGroups = fileGroups.map((group: File[]) => uploadFiles(group, updateGroupStatus));
 
+        // Change Promise.all to Promise.allSettled
         try {
-            await Promise.all(pendingGroups);
+            await Promise.allSettled(pendingGroups);
         } catch (error: unknown) {
+            // The error handling is done at a lower level at uploadFiles.
+            // We need tthe finally logic so this block can stay empty.
         } finally {
             setIsUploading(false);
             event.target.value = '';
-            // Record the completion time
             setButtonPressMinAgo(Date.now());
         }
     };
