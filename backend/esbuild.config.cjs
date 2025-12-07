@@ -13,13 +13,13 @@ esbuild.build({
     // Build options
     bundle: true,
     platform: 'node',
-    target: 'es2022',
+    target: 'es2024',
     format: 'cjs',
     minify: true,
     sourcemap: true,
-    banner: {
-        js: '"use strict";',
-    },
+    // banner: {
+    //     js: '"use strict";',
+    // },
 
     // External packages
     external: externalPackages,
