@@ -15,6 +15,29 @@ dotenv.config();
 
 const PORT = process.env.SERVER_PORT || 1020;
 
+// --- 0. CRITICAL PROCESS ERROR HANDLERS ---
+/**
+ * Catches promises that are rejected but have no .catch() handler.
+ * This is crucial for catching unhandled asynchronous errors.
+ */
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+/**
+ * Catches synchronous errors that escape all try/catch blocks and all middleware.
+ * This is the last line of defense for a crash.
+ */
+process.on('uncaughtException', (err) => {
+    console.error(`💥 [CRITICAL] Uncaught Exception: ${err.message}`);
+    console.error(err.stack);
+    // This is a catastrophic error. The application is in an unstable state.
+    // Perform cleanup if possible, and exit.
+    process.exit(1);
+});
+
+// --- REST OF YOUR CODE FOLLOWS ---
+
 /**
  * Loads and validates configuration settings for the MinIO Storage Service
  * from environment variables.
