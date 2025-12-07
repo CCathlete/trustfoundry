@@ -93,7 +93,7 @@ const uploadFiles = async (
     } catch (error: unknown) {
         const errorMessage: string = error instanceof Error ? error.message : 'Unknown upload error.';
         updateStatus({ id: groupId, fileNames: groupNames, totalSize: groupTotalSize, status: 'error', message: `Upload failed: ${errorMessage}` });
-        throw error;
+        // Rejected promises are resolved in a higher level.
     }
 }
 
@@ -204,7 +204,8 @@ const App = (): JSX.Element => {
             await Promise.allSettled(pendingGroups);
         } catch (error: unknown) {
             // The error handling is done at a lower level at uploadFiles.
-            // We need tthe finally logic so this block can stay empty.
+            // If there was an error its promise would get rejected and we'll 
+            // see it in allSettled.
         } finally {
             setIsUploading(false);
             event.target.value = '';
