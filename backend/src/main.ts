@@ -29,10 +29,8 @@ process.on('unhandledRejection', (reason, promise) => {
  * This is the last line of defense for a crash.
  */
 process.on('uncaughtException', (err) => {
-    console.error(`💥 [CRITICAL] Uncaught Exception: ${err.message}`);
+    console.error(`[CRITICAL] Uncaught Exception: ${err.message}`);
     console.error(err.stack);
-    // This is a catastrophic error. The application is in an unstable state.
-    // Perform cleanup if possible, and exit.
     process.exit(1);
 });
 
