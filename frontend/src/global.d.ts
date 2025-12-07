@@ -4,6 +4,18 @@ declare module '*.css' {
     export default content;
 }
 
+interface ImportMetaEnv {
+    // Readonly is good practice for environment variables
+    readonly VITE_BACKEND_SERVER_PORT: number;
+
+    // Add any other custom VITE_ variables you use
+    // readonly VITE_OTHER_VAR: string; 
+}
+
+interface ImportMeta {
+    readonly env: ImportMetaEnv;
+}
+
 // Optional: If you use other file types (like images) and get similar errors, 
 // you can add declarations for them here too:
 // declare module '*.svg' {
