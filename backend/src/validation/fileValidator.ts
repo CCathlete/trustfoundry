@@ -15,6 +15,9 @@ const DEFAULT_ALLOWED_MIME_TYPES: string[] = [
     'image/webp',
     'text/plain',
     'application/json',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    'application/vnd.ms-powerpoint', // .ppt
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
 ];
 
 /**

@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import express, { Request, Response, Router, NextFunction } from 'express';
-// import cors from 'cors';
+import cors from 'cors';
 import multer from 'multer';
 
 // Import necessary internal types and concrete implementations
@@ -129,25 +129,25 @@ const bootstrapAndRun = async () => {
     }
 
     // Middleware Setup
-    // app.use(cors({
-    //     origin: '*',
-    //     methods: 'GET,POST',
-    //     allowedHeaders: 'Content-Type,Authorization',
-    // }));
+    app.use(cors({
+        origin: '*',
+        methods: 'GET,POST',
+        allowedHeaders: 'Content-Type,Authorization',
+    }));
     app.use(express.json());
 
     // --- 3. ROUTE WIRING AND FALLBACKS ---
-    app.use('/', mainRouter!);
-    // if (!!mainRouter) {
-    //     app.use('/', mainRouter);
-    // } else {
-    //     app.use('*', (_, res) => {
-    //         res.status(503).json({
-    //             status: 'error',
-    //             message: 'Server starting up. Core services are unavailable.',
-    //         });
-    //     });
-    // }
+    // app.use('/', mainRouter!);
+    if (!!mainRouter) {
+        app.use('/', mainRouter);
+    } else {
+        app.use('*', (_, res) => {
+            res.status(503).json({
+                status: 'error',
+                message: 'Server starting up. Core services are unavailable.',
+            });
+        });
+    }
 
     // Health check route
     app.get('/health', (_: Request, res: Response) => {
