@@ -1,0 +1,24 @@
+server {
+    listen 80;
+
+    # Set the root directory for serving static files
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Serve static frontend files (SPA routing)
+    location / {
+        # Try to serve a file, otherwise fall back to index.html for client-side routing
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy API requests to the backend server
+    location /api/ {
+        # Forward traffic to the Node.js server (internal port)
+        proxy_pass http://localhost:${BACKEND_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

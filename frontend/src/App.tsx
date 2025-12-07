@@ -7,7 +7,9 @@ import { ForbiddenFileSchema, FORBIDDEN_MIME_TYPES } from './validation_schemas'
 // Constants
 const BACKEND_SERVER_PORT: number = import.meta.env.VITE_BACKEND_SERVER_PORT;
 const FILE_UPLOAD_LIMIT_BYTES: number = 10 * 1024 * 1024; // 10 MiB (Used for grouping)
-const API_URL: string = `http://localhost:${BACKEND_SERVER_PORT}/upload`;
+const API_URL: string = (import.meta.env.PROD || !BACKEND_SERVER_PORT)
+    ? '' // In production, API_URL is empty, so request is just "/upload"
+    : `http://localhost:${BACKEND_SERVER_PORT}`;
 const UPLOAD_COOLDOWN_MS: number = 3000; // 3 seconds cool-down period
 
 /**
