@@ -1,14 +1,6 @@
 # Ignore Node.js module directories globally
 **/node_modules
 
-# Ignore compiled artifacts you don't need to copy (though Dockerfile handles this)
-backend/dist
-frontend/dist
-
-# Ignore development source files (we build them inside the container)
-frontend/src
-backend/src
-
 # Other common ignores
 .git
 .venv
