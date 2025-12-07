@@ -93,7 +93,7 @@ const uploadFiles = async (
     } catch (error: unknown) {
         const errorMessage: string = error instanceof Error ? error.message : 'Unknown upload error.';
         updateStatus({ id: groupId, fileNames: groupNames, totalSize: groupTotalSize, status: 'error', message: `Upload failed: ${errorMessage}` });
-        // Rejected promises are resolved in a higher level.
+        // The error is resolved in updateStatus and the promise is rejected.
     }
 }
 
@@ -199,18 +199,13 @@ const App = (): JSX.Element => {
 
         const pendingGroups = fileGroups.map((group: File[]) => uploadFiles(group, updateGroupStatus));
 
-        // Change Promise.all to Promise.allSettled
-        try {
-            await Promise.allSettled(pendingGroups);
-        } catch (error: unknown) {
-            // The error handling is done at a lower level at uploadFiles.
-            // If there was an error its promise would get rejected and we'll 
-            // see it in allSettled.
-        } finally {
+        await Promise.all(pendingGroups);
+        // isUploading is set to false after a short delay.
+        setTimeout(() => {
             setIsUploading(false);
             event.target.value = '';
             setButtonPressMinAgo(Date.now());
-        }
+        }, 100);
     };
 
     const getStatusIcon = (status: UploadStatus['status']): JSX.Element | null => {
