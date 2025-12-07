@@ -30,6 +30,7 @@ WORKDIR /app/backend
 
 # Copy dependency files first
 COPY backend/package*.json ./
+
 # Install ONLY production dependencies to keep the image small
 RUN npm ci --loglevel=error --only=production
 
