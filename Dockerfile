@@ -3,18 +3,20 @@
 # ----------------------------------------------------------------------
 
 # Granular control for the base url to the backend service.
-ENV VITE_IS_PROD=false
+ARG VITE_IS_INNER_BACKEND=true
 
 # ----------------------------------------------------------------------
 # STAGE 1: Frontend Build (Vite/React/Vue)
 # Builds the static assets into /app/frontend/dist
 # ----------------------------------------------------------------------
 FROM node:20-alpine AS frontend_builder
+ARG VITE_IS_INNER_BACKEND
 
 WORKDIR /app/frontend
 
 # Set NODE_ENV for the build process (crucial for setting import.meta.env.PROD)
 ENV NODE_ENV=production
+ENV VITE_IS_INNER_BACKEND = ${VITE_IS_INNER_BACKEND}
 
 # Copy package files first for better build-cache utilization
 COPY frontend/package*.json ./
@@ -47,7 +49,10 @@ FROM nginx:alpine
 
 # Install Node.js runtime environment, Bash, and gettext (for envsubst)
 # gettext is needed for the Nginx configuration templating
+
 RUN apk add --no-cache nodejs npm bash gettext
+
+ARG VITE_IS_INNER_BACKEND
 
 # 1. Configuration Setup
 # Copy the custom Nginx TEMPLATE file for routing
@@ -69,6 +74,8 @@ COPY backend/package.json .
 
 # Set necessary environment variables (only NODE_ENV)
 ENV NODE_ENV=production
+ENV VITE_IS_INNER_BACKEND = ${VITE_IS_INNER_BACKEND}
+
 # The PORT variable is deliberately left out here; 
 # its default (4000) is set in the entrypoint script.
 
