@@ -6,7 +6,10 @@ import { ForbiddenFileSchema, FORBIDDEN_MIME_TYPES } from './validation_schemas'
 
 // Constants
 const BACKEND_SERVER_PORT: number = import.meta.env.VITE_BACKEND_SERVER_PORT;
-const PROD: boolean = import.meta.env.PROD || import.meta.env.VITE_IS_PROD;
+
+const PROD: boolean =
+    import.meta.env.PROD || import.meta.env.VITE_IS_INNER_BACKEND;
+
 const FILE_UPLOAD_LIMIT_BYTES: number = 10 * 1024 * 1024; // 10 MiB (Used for grouping)
 
 // const API_URL: string = `http://localhost:${BACKEND_SERVER_PORT}/upload`;

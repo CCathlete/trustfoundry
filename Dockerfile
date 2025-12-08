@@ -1,4 +1,11 @@
 # ----------------------------------------------------------------------
+# Global Scope Arguments
+# ----------------------------------------------------------------------
+
+# Granular control for the base url to the backend service.
+ENV VITE_IS_PROD=false
+
+# ----------------------------------------------------------------------
 # STAGE 1: Frontend Build (Vite/React/Vue)
 # Builds the static assets into /app/frontend/dist
 # ----------------------------------------------------------------------
@@ -8,8 +15,6 @@ WORKDIR /app/frontend
 
 # Set NODE_ENV for the build process (crucial for setting import.meta.env.PROD)
 ENV NODE_ENV=production
-# A fallback for setting the PROD var to true.
-ENV VITE_IS_PROD=true
 
 # Copy package files first for better build-cache utilization
 COPY frontend/package*.json ./
